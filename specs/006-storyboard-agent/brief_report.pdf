@@ -1,0 +1,265 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+2 0 obj
+<< /Length 4164 >>
+stream
+BT
+/F1 18 Tf
+1 0 0 1 72 720 Tm
+(A Brief Report on StoryboardAgent for Four-Panel Comic Story Expansion) Tj
+/F1 13 Tf
+1 0 0 1 72 688 Tm
+(Abstract) Tj
+/F1 11 Tf
+1 0 0 1 72 666 Tm
+(This report summarizes the design of StoryboardAgent, a lightweight planning component for) Tj
+/F1 11 Tf
+1 0 0 1 72 651 Tm
+(a CLI-based four-panel comic generator. The goal is to transform short user themes into) Tj
+/F1 11 Tf
+1 0 0 1 72 636 Tm
+(exactly four concrete, visually distinct panel beats before prompt construction and image) Tj
+/F1 11 Tf
+1 0 0 1 72 621 Tm
+(generation. The design stays deterministic by default, preserves the existing pipeline) Tj
+/F1 11 Tf
+1 0 0 1 72 606 Tm
+(contract, and improves story clarity for common prompt types such as day-in-the-life,) Tj
+/F1 11 Tf
+1 0 0 1 72 591 Tm
+(seasonal progression, journey, and problem-solving themes.) Tj
+/F1 13 Tf
+1 0 0 1 72 568 Tm
+(Introduction) Tj
+/F1 11 Tf
+1 0 0 1 72 546 Tm
+(The comic agent project converts a short theme into a four-panel comic package, including) Tj
+/F1 11 Tf
+1 0 0 1 72 531 Tm
+(panel prompts, generated images, a composed final page, and metadata. Earlier story) Tj
+/F1 11 Tf
+1 0 0 1 72 516 Tm
+(planning could produce panels that were structurally correct but visually repetitive. This) Tj
+/F1 11 Tf
+1 0 0 1 72 501 Tm
+(weakens narrative progression and makes downstream image prompts less informative.) Tj
+/F1 11 Tf
+1 0 0 1 72 486 Tm
+(StoryboardAgent addresses this issue by inserting a focused planning layer between the) Tj
+/F1 11 Tf
+1 0 0 1 72 471 Tm
+(user request and prompt generation. Instead of repeating the same theme across four) Tj
+/F1 11 Tf
+1 0 0 1 72 456 Tm
+(panels, the agent identifies a simple story structure, resolves the main subject, and) Tj
+/F1 11 Tf
+1 0 0 1 72 441 Tm
+(expands the request into four single-scene panel descriptions. The main design goals are) Tj
+/F1 11 Tf
+1 0 0 1 72 426 Tm
+(simplicity, determinism, and compatibility with the current CLI workflow.) Tj
+/F1 13 Tf
+1 0 0 1 72 403 Tm
+(Related Work) Tj
+/F1 11 Tf
+1 0 0 1 72 381 Tm
+(Within this repository, the most relevant prior work includes three existing subsystems.) Tj
+/F1 11 Tf
+1 0 0 1 72 366 Tm
+(First, the baseline story planner already produced a StoryStructure consumed by downstream) Tj
+/F1 11 Tf
+1 0 0 1 72 351 Tm
+(prompt building. Second, the LM-assisted planner added a semantic interpretation path for) Tj
+/F1 11 Tf
+1 0 0 1 72 336 Tm
+(richer understanding of prompts. Third, the panel validation pipeline enforced the single-) Tj
+/F1 11 Tf
+1 0 0 1 72 321 Tm
+(panel image contract after generation. StoryboardAgent does not replace these components.) Tj
+/F1 11 Tf
+1 0 0 1 72 306 Tm
+(It becomes the planning layer that creates stronger panel-level story beats while keeping) Tj
+/F1 11 Tf
+1 0 0 1 72 291 Tm
+(the old entrypoint and output schema intact. Compared with a fully LM-driven planner, the) Tj
+/F1 11 Tf
+1 0 0 1 72 276 Tm
+(default rule-based design trades flexibility for controllability, reproducibility, and) Tj
+/F1 11 Tf
+1 0 0 1 72 261 Tm
+(testability.) Tj
+/F1 13 Tf
+1 0 0 1 72 238 Tm
+(Method) Tj
+/F1 11 Tf
+1 0 0 1 72 216 Tm
+(The method follows a narrow and explicit pipeline. Given a ComicRequest, the agent first) Tj
+/F1 11 Tf
+1 0 0 1 72 201 Tm
+(normalizes the theme and resolves the subject. If the user provides an explicit character) Tj
+/F1 11 Tf
+1 0 0 1 72 186 Tm
+(override, that value has highest priority. Otherwise, the agent performs keyword-based) Tj
+/F1 11 Tf
+1 0 0 1 72 171 Tm
+(subject extraction and prefers specific subjects such as stray orange cat over generic) Tj
+/F1 11 Tf
+1 0 0 1 72 156 Tm
+(nouns such as cat. Next, the agent derives lightweight semantics from the theme, including) Tj
+/F1 11 Tf
+1 0 0 1 72 141 Tm
+(activity, primary object, setting hints, and domain cues. These cues drive deterministic) Tj
+/F1 11 Tf
+1 0 0 1 72 126 Tm
+(intent detection. The current implementation supports at least five core structures: day-) Tj
+/F1 11 Tf
+1 0 0 1 72 111 Tm
+(in-the-life, seasonal progression, journey or adventure, problem solving, and fallback.) Tj
+/F1 11 Tf
+1 0 0 1 72 96 Tm
+(The codebase also keeps a competition structure for sports-like prompts. Once the) Tj
+ET
+endstream
+endobj
+3 0 obj
+<< /Length 3990 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 72 720 Tm
+(structure is selected, the agent expands the request into four fixed beats. Each beat) Tj
+/F1 11 Tf
+1 0 0 1 72 705 Tm
+(contains a caption, action, emotion, and camera framing, and is rendered into a full) Tj
+/F1 11 Tf
+1 0 0 1 72 690 Tm
+(PanelSpec with concrete scene and visual descriptions. The method explicitly avoids page-) Tj
+/F1 11 Tf
+1 0 0 1 72 675 Tm
+(level layout terms such as grid, comic page, or four-panel layout, because each panel must) Tj
+/F1 11 Tf
+1 0 0 1 72 660 Tm
+(remain a single image scene for downstream generation. The system also preserves) Tj
+/F1 11 Tf
+1 0 0 1 72 645 Tm
+(compatibility with LM-assisted planning. In that mode, an external planner may provide one) Tj
+/F1 11 Tf
+1 0 0 1 72 630 Tm
+(structured semantic or storyboard result, but the local pipeline still validates the) Tj
+/F1 11 Tf
+1 0 0 1 72 615 Tm
+(result and keeps the same downstream interfaces. If LM-assisted planning fails, the system) Tj
+/F1 11 Tf
+1 0 0 1 72 600 Tm
+(falls back to the deterministic rule-based path.) Tj
+/F1 13 Tf
+1 0 0 1 72 577 Tm
+(Experimental Results) Tj
+/F1 11 Tf
+1 0 0 1 72 555 Tm
+(Evaluation in this project is regression-oriented rather than benchmark-oriented. The) Tj
+/F1 11 Tf
+1 0 0 1 72 540 Tm
+(repository includes unit tests for subject extraction, semantic parsing, intent detection,) Tj
+/F1 11 Tf
+1 0 0 1 72 525 Tm
+(and story expansion, as well as integration tests for full mock-provider pipeline) Tj
+/F1 11 Tf
+1 0 0 1 72 510 Tm
+(execution. The available tests show that the planner produces the expected four-stage) Tj
+/F1 11 Tf
+1 0 0 1 72 495 Tm
+(progressions for representative prompts. For example, the school-day prompt maps to) Tj
+/F1 11 Tf
+1 0 0 1 72 480 Tm
+(Morning, On the Way, At School, and Going Home; the seasonal cat prompt maps to Spring,) Tj
+/F1 11 Tf
+1 0 0 1 72 465 Tm
+(Summer, Autumn, and Winter; the lantern prompt maps to Departure, Encounter, Turning) Tj
+/F1 11 Tf
+1 0 0 1 72 450 Tm
+(Point, and Resolution; and the city-light repair prompt maps to Problem, Search, Solution,) Tj
+/F1 11 Tf
+1 0 0 1 72 435 Tm
+(and Payoff. The tests also check that panel scene descriptions stay distinct and avoid) Tj
+/F1 11 Tf
+1 0 0 1 72 420 Tm
+(prohibited layout language. Integration coverage further indicates that the planner) Tj
+/F1 11 Tf
+1 0 0 1 72 405 Tm
+(remains compatible with the existing CLI workflow. In mock runs, the pipeline still) Tj
+/F1 11 Tf
+1 0 0 1 72 390 Tm
+(produces four panel images, one final comic image, and a metadata file with planner) Tj
+/F1 11 Tf
+1 0 0 1 72 375 Tm
+(traces. Additional tests verify that unsafe themes are rejected early, LM-assisted results) Tj
+/F1 11 Tf
+1 0 0 1 72 360 Tm
+(can be consumed when valid, and retry traces are recorded when panel validation rejects an) Tj
+/F1 11 Tf
+1 0 0 1 72 345 Tm
+(image attempt. These results suggest that the main benefit of StoryboardAgent is improved) Tj
+/F1 11 Tf
+1 0 0 1 72 330 Tm
+(structural reliability before prompt generation, which should reduce repetitive prompts) Tj
+/F1 11 Tf
+1 0 0 1 72 315 Tm
+(and strengthen character consistency in downstream image synthesis.) Tj
+/F1 13 Tf
+1 0 0 1 72 292 Tm
+(Conclusion) Tj
+/F1 11 Tf
+1 0 0 1 72 270 Tm
+(StoryboardAgent is a small but high-leverage addition to the comic generation pipeline. By) Tj
+/F1 11 Tf
+1 0 0 1 72 255 Tm
+(converting short prompts into concrete four-panel story beats, it improves narrative) Tj
+/F1 11 Tf
+1 0 0 1 72 240 Tm
+(clarity without changing the CLI interface, provider abstractions, or export format. Its) Tj
+/F1 11 Tf
+1 0 0 1 72 225 Tm
+(deterministic default path is easy to test, easy to reason about, and appropriate for an) Tj
+/F1 11 Tf
+1 0 0 1 72 210 Tm
+(MVP-style local tool. Future work can improve semantic coverage and LM-assisted) Tj
+/F1 11 Tf
+1 0 0 1 72 195 Tm
+(robustness, but the current design already establishes a strong planning boundary: one) Tj
+/F1 11 Tf
+1 0 0 1 72 180 Tm
+(request, one subject, one structure, and four clear visual moments.) Tj
+ET
+endstream
+endobj
+4 0 obj
+<< /Type /Page /Parent 6 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R >> >> /Contents 2 0 R >>
+endobj
+5 0 obj
+<< /Type /Page /Parent 6 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R >> >> /Contents 3 0 R >>
+endobj
+6 0 obj
+<< /Type /Pages /Count 2 /Kids [4 0 R 5 0 R] >>
+endobj
+7 0 obj
+<< /Type /Catalog /Pages 6 0 R >>
+endobj
+xref
+0 8
+0000000000 65535 f 
+0000000015 00000 n 
+0000000085 00000 n 
+0000004301 00000 n 
+0000008343 00000 n 
+0000008469 00000 n 
+0000008595 00000 n 
+0000008658 00000 n 
+trailer
+<< /Size 8 /Root 7 0 R >>
+startxref
+8707
+%%EOF

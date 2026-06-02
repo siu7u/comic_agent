@@ -1,0 +1,148 @@
+{
+  "request": {
+    "theme": "一只小兔子上学的一天",
+    "provider": "wanx",
+    "style": null,
+    "character": null,
+    "image_prompt": null,
+    "panel_prompts": {},
+    "reference_image_path": null,
+    "lang": "zh",
+    "output_dir": "tmp/wanx-run"
+  },
+  "character_bible": {
+    "summary": "main character",
+    "appearance_traits": [
+      "distinctive visual traits matching main character",
+      "consistent facial markings and body proportions"
+    ],
+    "personality_notes": [
+      "readable silhouette",
+      "consistent face, body size, and markings in every panel"
+    ],
+    "consistency_rules": [
+      "keep character identity consistent across all four panels"
+    ]
+  },
+  "style_bible": {
+    "style_name": "default comic style",
+    "tone": "tone consistent with 一只小兔子上学的一天",
+    "composition_rules": [
+      "single-scene composition",
+      "clear subject focus"
+    ],
+    "rendering_traits": [
+      "default comic style",
+      "full-frame illustration"
+    ]
+  },
+  "story": {
+    "title": "Four-panel comic: 一只小兔子上学的一天",
+    "premise": "A four-panel comic about 一只小兔子上学的一天 featuring main character.",
+    "panels": [
+      {
+        "index": 1,
+        "caption": "Setup",
+        "dialogue": "main character notices something important.",
+        "scene_description": "一只小兔子上学的一天 - panel 1 focusing on main character",
+        "action": "Introduce the main situation",
+        "emotion": "curious",
+        "camera_framing": "wide shot",
+        "visual_description": "main character in a scene about 一只小兔子上学的一天",
+        "generated_prompt_base": "character: main character; appearance: distinctive visual traits matching main character; consistent facial markings and body proportions; scene: 一只小兔子上学的一天 - panel 1 focusing on main character; visual: main character in a scene about 一只小兔子上学的一天; action: Introduce the main situation; emotion: curious; camera/framing: wide shot; style: default comic style; tone: tone consistent with 一只小兔子上学的一天; consistency: keep character identity consistent across all four panels; single-scene composition; clear subject focus; constraints: single full-frame illustration; one scene only; no collage; no split-screen; no grid; no internal comic layout; no four-panel layout inside the image; no montage; no seasonal comparison layout; no text labels; no captions; no speech bubbles",
+        "final_image_prompt": "character: main character; appearance: distinctive visual traits matching main character; consistent facial markings and body proportions; scene: 一只小兔子上学的一天 - panel 1 focusing on main character; visual: main character in a scene about 一只小兔子上学的一天; action: Introduce the main situation; emotion: curious; camera/framing: wide shot; style: default comic style; tone: tone consistent with 一只小兔子上学的一天; consistency: keep character identity consistent across all four panels; single-scene composition; clear subject focus; constraints: single full-frame illustration; one scene only; no collage; no split-screen; no grid; no internal comic layout; no four-panel layout inside the image; no montage; no seasonal comparison layout; no text labels; no captions; no speech bubbles",
+        "prompt_source": "generated",
+        "warnings": [],
+        "retry_count": 0,
+        "image_path": "tmp/wanx-run/panel-1.png",
+        "input_mode": "text_only",
+        "provider_name": "WanxImageProvider",
+        "provider_mode": "real",
+        "generation_succeeded": true,
+        "failure_message": null
+      },
+      {
+        "index": 2,
+        "caption": "Complication",
+        "dialogue": "main character says, 'This got harder than expected.'",
+        "scene_description": "一只小兔子上学的一天 - panel 2 focusing on main character",
+        "action": "Present the obstacle",
+        "emotion": "tense",
+        "camera_framing": "medium shot",
+        "visual_description": "main character in a scene about 一只小兔子上学的一天",
+        "generated_prompt_base": "character: main character; appearance: distinctive visual traits matching main character; consistent facial markings and body proportions; scene: 一只小兔子上学的一天 - panel 2 focusing on main character; visual: main character in a scene about 一只小兔子上学的一天; action: Present the obstacle; emotion: tense; camera/framing: medium shot; style: default comic style; tone: tone consistent with 一只小兔子上学的一天; consistency: keep character identity consistent across all four panels; single-scene composition; clear subject focus; constraints: single full-frame illustration; one scene only; no collage; no split-screen; no grid; no internal comic layout; no four-panel layout inside the image; no montage; no seasonal comparison layout; no text labels; no captions; no speech bubbles",
+        "final_image_prompt": "character: main character; appearance: distinctive visual traits matching main character; consistent facial markings and body proportions; scene: 一只小兔子上学的一天 - panel 2 focusing on main character; visual: main character in a scene about 一只小兔子上学的一天; action: Present the obstacle; emotion: tense; camera/framing: medium shot; style: default comic style; tone: tone consistent with 一只小兔子上学的一天; consistency: keep character identity consistent across all four panels; single-scene composition; clear subject focus; constraints: single full-frame illustration; one scene only; no collage; no split-screen; no grid; no internal comic layout; no four-panel layout inside the image; no montage; no seasonal comparison layout; no text labels; no captions; no speech bubbles",
+        "prompt_source": "generated",
+        "warnings": [],
+        "retry_count": 0,
+        "image_path": "tmp/wanx-run/panel-2.png",
+        "input_mode": "text_only",
+        "provider_name": "WanxImageProvider",
+        "provider_mode": "real",
+        "generation_succeeded": true,
+        "failure_message": null
+      },
+      {
+        "index": 3,
+        "caption": "Response",
+        "dialogue": "main character says, 'I can still make this work.'",
+        "scene_description": "一只小兔子上学的一天 - panel 3 focusing on main character",
+        "action": "Show the turning point",
+        "emotion": "determined",
+        "camera_framing": "close-up",
+        "visual_description": "main character in a scene about 一只小兔子上学的一天",
+        "generated_prompt_base": "character: main character; appearance: distinctive visual traits matching main character; consistent facial markings and body proportions; scene: 一只小兔子上学的一天 - panel 3 focusing on main character; visual: main character in a scene about 一只小兔子上学的一天; action: Show the turning point; emotion: determined; camera/framing: close-up; style: default comic style; tone: tone consistent with 一只小兔子上学的一天; consistency: keep character identity consistent across all four panels; single-scene composition; clear subject focus; constraints: single full-frame illustration; one scene only; no collage; no split-screen; no grid; no internal comic layout; no four-panel layout inside the image; no montage; no seasonal comparison layout; no text labels; no captions; no speech bubbles",
+        "final_image_prompt": "character: main character; appearance: distinctive visual traits matching main character; consistent facial markings and body proportions; scene: 一只小兔子上学的一天 - panel 3 focusing on main character; visual: main character in a scene about 一只小兔子上学的一天; action: Show the turning point; emotion: determined; camera/framing: close-up; style: default comic style; tone: tone consistent with 一只小兔子上学的一天; consistency: keep character identity consistent across all four panels; single-scene composition; clear subject focus; constraints: single full-frame illustration; one scene only; no collage; no split-screen; no grid; no internal comic layout; no four-panel layout inside the image; no montage; no seasonal comparison layout; no text labels; no captions; no speech bubbles",
+        "prompt_source": "generated",
+        "warnings": [],
+        "retry_count": 0,
+        "image_path": "tmp/wanx-run/panel-3.png",
+        "input_mode": "text_only",
+        "provider_name": "WanxImageProvider",
+        "provider_mode": "real",
+        "generation_succeeded": true,
+        "failure_message": null
+      },
+      {
+        "index": 4,
+        "caption": "Resolution",
+        "dialogue": "main character says, 'That turned out better than I hoped.'",
+        "scene_description": "一只小兔子上学的一天 - panel 4 focusing on main character",
+        "action": "Deliver the payoff",
+        "emotion": "joyful",
+        "camera_framing": "wide shot",
+        "visual_description": "main character in a scene about 一只小兔子上学的一天",
+        "generated_prompt_base": "character: main character; appearance: distinctive visual traits matching main character; consistent facial markings and body proportions; scene: 一只小兔子上学的一天 - panel 4 focusing on main character; visual: main character in a scene about 一只小兔子上学的一天; action: Deliver the payoff; emotion: joyful; camera/framing: wide shot; style: default comic style; tone: tone consistent with 一只小兔子上学的一天; consistency: keep character identity consistent across all four panels; single-scene composition; clear subject focus; constraints: single full-frame illustration; one scene only; no collage; no split-screen; no grid; no internal comic layout; no four-panel layout inside the image; no montage; no seasonal comparison layout; no text labels; no captions; no speech bubbles",
+        "final_image_prompt": "character: main character; appearance: distinctive visual traits matching main character; consistent facial markings and body proportions; scene: 一只小兔子上学的一天 - panel 4 focusing on main character; visual: main character in a scene about 一只小兔子上学的一天; action: Deliver the payoff; emotion: joyful; camera/framing: wide shot; style: default comic style; tone: tone consistent with 一只小兔子上学的一天; consistency: keep character identity consistent across all four panels; single-scene composition; clear subject focus; constraints: single full-frame illustration; one scene only; no collage; no split-screen; no grid; no internal comic layout; no four-panel layout inside the image; no montage; no seasonal comparison layout; no text labels; no captions; no speech bubbles",
+        "prompt_source": "generated",
+        "warnings": [],
+        "retry_count": 0,
+        "image_path": "tmp/wanx-run/panel-4.png",
+        "input_mode": "text_only",
+        "provider_name": "WanxImageProvider",
+        "provider_mode": "real",
+        "generation_succeeded": true,
+        "failure_message": null
+      }
+    ]
+  },
+  "provider": "WanxImageProvider",
+  "provider_mode": "real",
+  "provider_run": {
+    "provider_name": "WanxImageProvider",
+    "provider_mode": "real",
+    "started_with_valid_config": true,
+    "completed_successfully": true,
+    "failure_message": null
+  },
+  "reference_image_path": null,
+  "panel_image_paths": [
+    "tmp/wanx-run/panel-1.png",
+    "tmp/wanx-run/panel-2.png",
+    "tmp/wanx-run/panel-3.png",
+    "tmp/wanx-run/panel-4.png"
+  ],
+  "final_comic_path": "tmp/wanx-run/comic.png",
+  "warnings": [],
+  "created_at": "2026-05-29T03:06:55.236795+00:00"
+}

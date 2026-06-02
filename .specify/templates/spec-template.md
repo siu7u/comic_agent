@@ -74,6 +74,10 @@
 
 - What happens when [boundary condition]?
 - How does system handle [error scenario]?
+- What happens when a request is unsafe and must be rejected or rewritten before
+  image generation?
+- How does the system recover when one panel image generation step fails while
+  preserving a valid partial or failed-run metadata record?
 
 ## Requirements *(mandatory)*
 
@@ -89,16 +93,31 @@
 - **FR-003**: Users MUST be able to [key interaction, e.g., "reset their password"]
 - **FR-004**: System MUST [data requirement, e.g., "persist user preferences"]
 - **FR-005**: System MUST [behavior, e.g., "log all security events"]
+- **FR-006**: System MUST define explicit output artifacts, including any
+  generated files and metadata produced by the feature.
+- **FR-007**: System MUST specify whether external provider interactions are
+  part of the feature and how they will be mocked or substituted in tests.
+- **FR-008**: System MUST describe any character-consistency, style-consistency,
+  or safety constraints that affect output generation.
 
 *Example of marking unclear requirements:*
 
-- **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
-- **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
+- **FR-009**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
+- **FR-010**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
 
 ### Key Entities *(include if feature involves data)*
 
 - **[Entity 1]**: [What it represents, key attributes without implementation]
 - **[Entity 2]**: [What it represents, relationships to other entities]
+
+## Safety and Scope Constraints *(mandatory)*
+
+- **Safety Rules**: [State what content is blocked, rewritten, or escalated
+  before external side effects occur]
+- **Out of Scope**: [List non-MVP capabilities that MUST NOT be implemented in
+  this feature]
+- **Verification Plan**: [State the smallest real command that will be run after
+  implementation to verify the change]
 
 ## Success Criteria *(mandatory)*
 

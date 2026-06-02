@@ -1,0 +1,156 @@
+A Brief Report on StoryboardAgent for Four-Panel Comic Story Expansion
+
+Abstract
+
+This report presents StoryboardAgent, a lightweight planning component for a CLI-based four-panel comic generation system. The main motivation of this work is to improve the quality of story expansion from short user prompts. In earlier versions of the pipeline, the system could generate four panels that were structurally complete but narratively weak, because the panel descriptions often repeated similar content without showing a clear progression. StoryboardAgent addresses this limitation by transforming a simple theme into exactly four concrete, visually distinct, single-scene panel beats before prompt generation and image synthesis. The design emphasizes determinism, compatibility, and testability. It preserves the existing command-line interface, provider abstractions, image composition logic, and metadata export behavior while strengthening the planning stage. The method combines subject resolution, simple semantic parsing, rule-based intent detection, and fixed beat expansion for several common story structures, including day-in-the-life stories, seasonal progression stories, journey or adventure stories, problem-solving stories, and a fallback structure for vague prompts. Repository tests indicate that the approach improves the consistency and specificity of generated panel descriptions while remaining fully compatible with the current pipeline.
+
+1. Introduction
+
+Automatically generating comics from short prompts is an appealing but difficult task because image generation alone is not sufficient to produce a coherent story. A four-panel comic requires not only visually plausible images, but also a recognizable narrative progression. If the planning stage is too weak, the downstream image generation process receives prompts that are repetitive, abstract, or under-specified. As a result, even if each individual image is acceptable, the final comic may still feel flat or unstructured.
+
+The comic agent project in this repository is a CLI-oriented MVP that converts a short user theme into a complete four-panel comic package. The pipeline takes a request, constructs a story, builds panel prompts, calls either a mock or real image provider, validates generated panels, composes a final 2x2 comic image, and exports metadata for traceability. The project already has several strong engineering properties: a fixed output format, mock-safe tests, deterministic local execution paths, and a clean separation between planning, prompt building, provider selection, panel validation, and export. However, a remaining weakness was the planning quality of the story expansion stage.
+
+The core problem is simple: a user may provide a compact theme such as “a rabbit’s day at school,” “a stray orange cat across four seasons,” or “a robot repairs the city lights,” but those prompts do not directly specify four visually distinct panels. A useful planning system must infer a progression from the theme, preserve the main subject across all panels, and produce scenes that are concrete enough for image prompting. At the same time, the planning logic should not become overly complex or depend entirely on external model calls, because the project explicitly values local determinism, easy testing, and compatibility with the existing CLI workflow.
+
+StoryboardAgent was designed to solve this exact problem. It introduces a lightweight internal planning layer that converts a simple prompt into a structured four-panel story. The component is intentionally narrow in scope. It does not change provider interfaces, does not modify the final page composition logic, and does not replace downstream prompt generation. Instead, it strengthens the planning boundary by ensuring that every request is translated into one subject, one story structure, and four distinct visual moments.
+
+The design goals of StoryboardAgent can be summarized as follows. First, it should produce exactly four panels for every valid request. Second, each panel should describe one scene only, rather than a multi-scene layout or montage. Third, the resulting story should be more concrete and narratively meaningful than a repeated restatement of the user prompt. Fourth, the system should remain deterministic and easy to test in its default mode. Fifth, the implementation should remain compatible with the current repository contracts so that the rest of the pipeline continues to work unchanged.
+
+2. Related Work
+
+Visual storytelling has been studied as a sequence-level generation problem in which the goal is to produce a coherent narrative grounded in multiple images, rather than a set of independent captions. Huang et al. [1] established this distinction clearly, showing that visual storytelling requires temporal progression, narrative coherence, and higher-level abstraction beyond object-level description. This perspective is directly relevant to four-panel comic generation, where the quality of the final output depends not only on per-panel plausibility, but also on whether the sequence forms a readable and coherent story.
+
+A major direction in prior work is to introduce explicit intermediate planning before full story generation. Hsu et al. [2] proposed modeling storylines as structured intermediate representations, demonstrating that narrative coherence improves when the system first identifies salient content and organizes it into a progression. Liu et al. [3] further advanced this idea by using question-answer blueprints as explicit plans for content selection and ordering. These works support a key design principle behind our system: story generation benefits from a planning stage that disentangles what happens from how it is rendered. Our approach follows this principle, but differs in methodology. Instead of learning a neural planner end-to-end, we adopt a lightweight deterministic planner that maps a short user theme to a fixed four-beat storyboard. This choice sacrifices expressive coverage in favor of controllability, testability, and compatibility with an existing CLI pipeline.
+
+Another closely related line of work studies story visualization, where a textual narrative is rendered as a sequence of images while preserving continuity across frames. Make-A-Story [4] addresses this problem with a visual memory mechanism that carries actor and background information across generated images. The importance of this line of work lies in its emphasis on cross-image consistency: a visually convincing sequence must preserve identity and scene continuity, not merely generate individually plausible frames. Our work targets a different stage of the pipeline. Rather than enforcing consistency inside the image generator, we strengthen consistency upstream by producing clearer subject anchors and more structured panel-level story beats before prompt construction. In this sense, our method is complementary to story-visualization models: it focuses on narrative planning rather than generative memory.
+
+Recent work on consistent text-to-image generation reinforces the importance of explicit identity control for sequential visual content. Avrahami et al. [5] show that generating the same character consistently across prompts remains a challenging problem even for strong diffusion models, and propose an automated method for extracting stable character identity from generated image sets. Tewel et al. [6] similarly propose a training-free method for subject-consistent generation by sharing internal activations across images while preserving prompt alignment and layout diversity. Although these methods operate at the image-synthesis level rather than the planning level, they motivate one of our central assumptions: subject consistency should be handled explicitly, not left to emerge from prompt repetition alone. This motivates our emphasis on subject resolution, character override priority, and fixed story structures centered on one stable main entity.
+
+Finally, evaluation in visual storytelling has also evolved beyond conventional n-gram overlap metrics. Wang et al. [7] argue that metrics such as BLEU and CIDEr are poorly matched to the narrative requirements of visual storytelling, and propose RoViST to evaluate dimensions such as coherence, visual grounding, and non-redundancy. This observation is relevant to our current evaluation protocol. Our present experiments are primarily regression-oriented and emphasize structural validity, distinctness of panel scenes, compatibility with downstream pipeline components, and safe failure behavior. While such tests are appropriate for an engineering-focused MVP, prior work suggests that more comprehensive future evaluation should directly assess narrative coherence and grounding quality, ideally through both human judgment and task-specific learned metrics.
+
+Overall, our work is most closely aligned with planning-based approaches to visual storytelling, but differs in its scope and objectives. Rather than proposing a learned end-to-end storytelling model, we introduce a deterministic storyboard planning layer for a practical four-panel comic system. The contribution is therefore not a new generative architecture, but a planning-first design that bridges underspecified prompts and downstream single-panel image generation in a simple, modular, and testable way.
+
+3. Method
+
+3.1 Overall Design
+
+StoryboardAgent is a lightweight planning component that accepts a ComicRequest and returns a StoryStructure compatible with the rest of the pipeline. The implementation is designed to be deterministic by default, meaning that the same valid input should yield the same planning result under the rule-based path. This choice is important because it supports reproducible behavior, stable regression tests, and easier debugging.
+
+The method has four main stages:
+
+1. Input normalization and subject resolution.
+2. Lightweight semantic parsing.
+3. Intent or story-structure detection.
+4. Four-beat expansion into concrete panel descriptions.
+
+These stages are intentionally simple. The goal is not to perform deep natural-language understanding, but to provide enough structure to support the project’s supported prompt patterns.
+
+3.2 Subject Resolution
+
+Subject consistency is one of the most important requirements in four-panel storytelling. If the main subject changes, becomes overly generic, or gets extracted as an action phrase rather than a character or focal entity, the resulting comic becomes harder to interpret and more difficult to render consistently across panels.
+
+StoryboardAgent resolves the subject using a priority-based strategy. If the user provides an explicit character override, that value takes precedence over all inferred candidates. This ensures that user intent is respected and that the planner does not substitute a weaker heuristic choice when a clearer character description is already available.
+
+If there is no explicit character override, the system attempts to infer the subject from the theme itself. The implementation prefers specific subject patterns over generic ones. For example, if the theme refers to a “stray orange cat,” the system should keep that specific subject rather than collapsing it to the generic word “cat.” This matters because specific subjects carry more useful identity information for downstream consistency. The implementation also avoids returning action phrases such as “rabbit going to school” as the subject, since such strings blur the distinction between entity and event.
+
+If the planner cannot infer a meaningful subject from the request, it falls back to a generic placeholder such as “main character.” This fallback is not ideal for visual richness, but it ensures that the story structure remains valid and complete.
+
+3.3 Semantic Parsing
+
+After resolving the subject, StoryboardAgent derives a lightweight semantic representation from the theme. This representation includes fields such as subject, activity, primary object, setting hints, temporal cues, and domain cues. The semantic parser is not meant to be a general-purpose language understanding system. Instead, it extracts just enough structure to support story type detection and panel expansion.
+
+For example, a theme about repairing city lights may produce signals indicating a problem-solving story, an urban environment, and an object related to lighting. A theme about a lantern launch may imply a journey or event progression centered on preparation, release, and outcome. A seasonal prompt may include explicit time- or season-related cues. A school-day prompt may imply a daily progression from departure to return.
+
+This intermediate semantic layer serves two purposes. First, it reduces the dependence on shallow keyword matching alone by allowing simple normalized cues to drive later decisions. Second, it creates a stable interface that LM-assisted planning can also use. In other words, both local rule-based logic and LM-produced structured semantics can feed into the same expansion pathway.
+
+3.4 Story Structure Detection
+
+One of the most important design decisions is that the system selects exactly one storyboard structure per request. This avoids mixed or inconsistent panel logic. Some prompts naturally contain overlapping cues, so the planner must resolve ambiguity deterministically rather than combining multiple structures into one confusing story.
+
+The current implementation supports at least the following main structures:
+
+- Day-in-the-life
+- Seasonal progression
+- Journey or adventure
+- Problem solving
+- Fallback story
+
+The codebase also maintains a competition-oriented structure for prompts that resemble a sports or contest narrative.
+
+Each structure has a fixed sequence of four beats. For example, the day-in-the-life path follows a sequence such as Morning, On the Way, At School, and Going Home. The seasonal path maps to Spring, Summer, Autumn, and Winter. The journey path uses Departure, Encounter, Turning Point, and Resolution. The problem-solving path uses Problem, Search, Solution, and Payoff. The fallback structure uses Setup, Complication, Response, and Resolution.
+
+This approach may appear rigid, but that rigidity is deliberate. The project specifically aims for predictable four-panel output that remains image-friendly and easy to test. A narrower but more reliable structure set is preferable to a more ambitious but unstable ontology of many story categories.
+
+3.5 Beat Expansion
+
+Once the structure type is chosen, StoryboardAgent expands the request into four concrete panel beats. Each beat includes a caption, action, emotion, and camera framing. These fields are then used to construct a full PanelSpec that also contains a dialogue line, a scene description, and a visual description.
+
+The key requirement is that each panel must describe exactly one visual moment. The planner should not ask a single image to show multiple stages of time progression, multiple seasons, or a full comic page layout. The scene description should be concrete enough that a downstream prompt builder can turn it into an image prompt without inventing the entire scene from scratch.
+
+For this reason, the implementation emphasizes simple visual anchors: a location, a pose or action, a few visible props, and an immediate moment. Instead of vague instructions such as “show the character facing challenges,” the planner aims to produce descriptions closer to “the fox lights a paper lantern in a dusk courtyard” or “the robot inspects a dark city street under broken lamps.” This level of specificity is not meant to be literary; it is meant to be image-friendly.
+
+3.6 LM-Assisted Compatibility
+
+Although StoryboardAgent is deterministic by default, the repository also supports an LM-assisted planning mode. The important architectural choice is that this mode should not create a completely separate planning system with incompatible output assumptions. Instead, LM-assisted planning is designed to produce structured results that can be validated and then passed into the same downstream flow.
+
+This unification has several benefits. It prevents duplication of planning logic, reduces divergence between local and model-assisted paths, and keeps the rest of the pipeline independent from the source of planning semantics. It also supports fallback behavior. If the LM-assisted request fails because of configuration problems, invalid output, or network issues, the system falls back to the rule-based planner and records that fallback in metadata.
+
+3.7 Safety and Constraints
+
+The method is also shaped by explicit safety and scope constraints. Unsafe themes must still be rejected before downstream side effects occur. StoryboardAgent must not introduce additional unsafe content beyond the user request. It must also avoid page-layout instructions that are known to interfere with single-panel image generation.
+
+Several broader constraints are equally important. The implementation should not add a new provider abstraction, should not change the final comic layout, should not introduce external agent frameworks, and should not require network access in its default mode. These constraints help keep the feature aligned with the project’s MVP philosophy.
+
+4. Experimental Results
+
+4.1 Evaluation Strategy
+
+The evaluation in this project is regression-oriented rather than benchmark-driven. The purpose is not to claim state-of-the-art performance on open-ended story generation. Instead, the goal is to verify that StoryboardAgent improves planning quality for supported prompt types while preserving compatibility with the existing comic-generation pipeline.
+
+The repository includes unit tests and integration tests that exercise the planner from several angles. Unit tests focus on subject extraction, semantic parsing, intent detection, and structure-specific beat generation. Integration tests focus on end-to-end pipeline behavior using mock providers and metadata inspection.
+
+This style of evaluation is appropriate for the project because the feature is an internal planning module inside an application pipeline. The most important questions are whether the planner produces the right kind of structure, whether scenes remain distinct and concrete, whether the output shape is stable, and whether the rest of the system continues to work unchanged.
+
+4.2 Subject Extraction and Semantic Tests
+
+The test suite includes coverage for subject resolution behavior. One important check verifies that an explicit user-provided character override takes priority over inferred subjects. Another confirms that the planner prefers specific subjects over generic ones. For example, the planner should keep “stray orange cat” rather than reducing it to “cat.” Additional tests confirm that subject extraction avoids action phrases in cases such as a school-day prompt.
+
+The semantic parser is also tested against representative prompts. For instance, a city-light repair theme is expected to yield a robot subject, a repair-oriented activity, a lighting-related object, and domain cues associated with problem solving. A lantern-launch theme is expected to yield semantics consistent with a journey or event progression.
+
+These tests are important because they validate the intermediate logic that determines the final story expansion. If subject resolution or semantic parsing fails early, the resulting four-panel story is likely to degrade even if the beat templates themselves are correct.
+
+4.3 Intent Detection and Beat Expansion
+
+The test suite also verifies that the planner selects appropriate structures for representative themes. A seasonal prompt should map to a seasonal progression rather than an unrelated fallback. A school-day prompt should map to day-in-the-life progression. A repair prompt should map to problem solving. A lantern prompt should map to journey or adventure. A generic prompt that lacks clear structure cues should use the fallback story pattern.
+
+Beyond structure classification, the tests inspect the generated panels themselves. For the school-day example, the expected captions are Morning, On the Way, At School, and Going Home. The corresponding scene descriptions and actions are checked for specific environmental details such as home departure, road travel, classroom activity, and return home. The tests also verify that all four scene descriptions are distinct and that prohibited layout phrases do not appear.
+
+For the seasonal cat example, the tests verify that the captions correspond to the four seasons and that each panel describes only one seasonal setting rather than a multi-season comparison scene. This matters because a prompt that asks for “all seasons in one image” would violate the single-scene image contract and undermine downstream generation quality.
+
+For the lantern journey prompt, the tests verify a progression from preparation to encounter, then to turning point, and finally to resolution. For the city-light repair prompt, the tests verify a sequence from visible problem to search, then solution, and finally payoff. The suite also includes a competition-style case to ensure that sports-like themes still expand into a meaningful four-stage progression.
+
+4.4 Pipeline Compatibility
+
+The repository’s integration tests indicate that StoryboardAgent remains compatible with the rest of the pipeline. In mock-provider runs, the system still creates four panel images, one final comic image, and a metadata file. The metadata records planner mode information, provider information, panel attempt traces, and the exported story structure.
+
+This compatibility is a major result because it shows that the feature improves planning quality without destabilizing the application’s external behavior. The CLI interface remains the same. Provider selection remains the same. Image composition remains the same. Metadata export remains the same. In practical terms, this means StoryboardAgent can improve the “brain” of the comic generator without forcing changes to the rest of the engineering surface.
+
+The integration tests also verify auxiliary behaviors such as unsafe-theme rejection, retry trace recording when panel validation rejects an image, and support for LM-assisted planning when a structured storyboard result is supplied. Together, these checks strengthen confidence that StoryboardAgent is not only functionally useful but also operationally safe within the current system.
+
+4.5 Interpretation of Results
+
+The most important outcome is not that StoryboardAgent solves all story-generation challenges, but that it establishes a stronger and more reliable planning baseline. The planner produces panel descriptions that are more concrete, more distinct, and more appropriately structured for downstream prompt building. This is especially valuable in a pipeline where image quality depends heavily on the clarity of the prompt given to the provider.
+
+The results also show the practical value of constrained design. Instead of attempting an open-ended story planner, the system focuses on a small number of common narrative patterns and executes them consistently. This improves controllability and keeps the feature aligned with the repository’s testing and maintainability goals.
+
+There are still limitations. The rule-based planner only supports a narrow set of structures. Its bilingual support is basic rather than linguistically deep. Its fallback structure remains generic compared with the more specialized patterns. Nevertheless, for an MVP-style local comic generator, these limitations are acceptable because they are transparent, bounded, and easy to improve later.
+
+5. Conclusion
+
+StoryboardAgent is a targeted improvement to the comic agent pipeline that strengthens the relationship between user intent and panel-level story structure. By converting short themes into four concrete visual beats, it addresses one of the most common weaknesses in automatic comic generation: repeated or under-specified scenes that fail to form a satisfying progression.
+
+The contribution of this component is primarily architectural and practical rather than theoretical. It defines a stable planning boundary inside the system. It preserves compatibility with the existing story, prompt, provider, validation, composition, and export pipeline. It supports both deterministic local execution and an LM-assisted mode without forcing the rest of the system to care about where the planning semantics came from. It also fits well with the project’s engineering principles of simplicity, testability, and modularity.
+
+From an implementation perspective, the design is intentionally conservative. It uses explicit subject resolution, lightweight semantic parsing, fixed intent categories, and deterministic beat templates. This narrow scope is a strength in the context of the project, because it allows the feature to deliver immediate quality gains without creating a large maintenance burden.
+
+Future work could expand the supported set of story structures, improve English and Chinese semantic coverage, refine fallback behavior, and strengthen the LM-assisted path with better validation and error analysis. However, even in its current form, StoryboardAgent represents a meaningful improvement. It helps ensure that one request becomes one coherent four-panel story with one stable subject and four distinct visual moments. For a CLI-based comic generation MVP, that is a strong and useful foundation.

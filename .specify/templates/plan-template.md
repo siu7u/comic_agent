@@ -31,7 +31,24 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- `Spec-First Delivery`: Confirm `spec.md`, `plan.md`, and `tasks.md` define the
+  implementation scope before coding starts.
+- `CLI MVP and Simplicity`: Confirm the feature remains a CLI-first MVP and
+  record any necessary complexity in the Complexity Tracking section.
+- `Modular Comic Pipeline`: Define boundaries for story planning, panel prompt
+  generation, image provider execution, layout composition, and export.
+- `Verifiable Core Logic`: Describe the `pytest` strategy for core logic and how
+  external image APIs will be mocked.
+- `Minimal Provider Abstraction`: Keep the provider interface minimal and define
+  the default provider for development and tests.
+- `Character and Style Consistency`: Explain how the character bible and style
+  bible are represented and passed across all four panels.
+- `Safety Before Generation`: Identify the rejection or rewrite step for unsafe
+  requests before image generation.
+- `Real Command Verification`: Name the smallest relevant test, lint,
+  typecheck, or demo command that will be run after implementation.
+- `No Speculative Features`: List explicit out-of-scope items when needed to
+  prevent scope creep.
 
 ## Project Structure
 
@@ -93,6 +110,13 @@ ios/ or android/
 
 **Structure Decision**: [Document the selected structure and reference the real
 directories captured above]
+
+## Consistency and Safety Design
+
+**Character Bible**: [How recurring characters are defined and propagated]
+**Style Bible**: [How artistic style and tone are defined and reused]
+**Safety Strategy**: [How unsafe requests are rejected or rewritten]
+**Metadata Traceability**: [What run data is exported for auditability]
 
 ## Complexity Tracking
 
